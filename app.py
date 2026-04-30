@@ -8,48 +8,55 @@ from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="Interior Design AI", page_icon="🛋️", layout="wide", initial_sidebar_state="collapsed")
 
-# Inject Custom CSS for Widget Look
+# Inject Custom CSS for Dark Mode Chat Widget Look
 st.markdown("""
 <style>
-    /* Bright Clean Background */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+    
+    /* Dark Theme Background */
     .stApp {
-        background-color: #f4f7fb;
-        font-family: 'Inter', -apple-system, sans-serif;
+        background: radial-gradient(circle at 15% 50%, #1e1b4b, #09090b);
+        color: #f8fafc;
+        font-family: 'Outfit', sans-serif;
     }
     
     h1 {
-        color: #0f172a !important;
-        font-weight: 800 !important;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700 !important;
+        font-size: 3.5rem !important;
+        background: linear-gradient(90deg, #d8b4fe, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
         padding-bottom: 2rem;
-        letter-spacing: -1px;
+        margin-top: -2rem;
     }
     
-    /* Remove padding around the scrollable box */
+    /* Scrollable Chat Box Container */
     [data-testid="stVerticalBlock"] > div[data-testid="stScrollableContainer"] {
-        background-color: #ffffff;
-        border-left: 1px solid #e2e8f0;
-        border-right: 1px solid #e2e8f0;
+        background: rgba(15, 23, 42, 0.4) !important;
+        border-left: 2px solid rgba(255,255,255,0.2) !important;
+        border-right: 2px solid rgba(255,255,255,0.2) !important;
         padding: 1.5rem !important;
     }
     
     /* Style Visualizer Column to look like a Card */
     [data-testid="column"]:nth-of-type(2) {
-        background-color: #ffffff;
+        background: rgba(15, 23, 42, 0.4);
         padding: 2rem;
         border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255,255,255,0.2);
     }
     
     /* AI Message Bubble */
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-        background-color: #f1f5f9;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 18px;
         border-bottom-left-radius: 4px;
         padding: 0.8rem 1.2rem;
-        color: #1e293b;
-        border: none;
+        color: #f8fafc;
         margin-right: 15%;
         margin-bottom: 1rem;
     }
@@ -57,39 +64,52 @@ st.markdown("""
     /* User Message Bubble */
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
         flex-direction: row-reverse;
-        background-color: #2563eb;
+        background: rgba(129, 140, 248, 0.15);
+        border: 1px solid rgba(129, 140, 248, 0.3);
         border-radius: 18px;
         border-bottom-right-radius: 4px;
         padding: 0.8rem 1.2rem;
-        color: white !important;
-        border: none;
+        color: #f8fafc !important;
         margin-left: 15%;
         margin-bottom: 1rem;
-        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
     }
     
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p {
-        color: white !important;
+        color: #f8fafc !important;
     }
     
-    /* Input field styling to attach seamlessly to the chat box */
+    /* Input field styling */
     div[data-testid="stTextInput"] input {
         border-radius: 0px 0px 16px 16px !important;
-        border: 1px solid #e2e8f0;
+        border: 2px solid rgba(255,255,255,0.2);
         border-top: none;
         padding: 1.2rem;
-        background-color: #ffffff;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        background: rgba(15, 23, 42, 0.6);
+        color: white;
         font-size: 1rem;
     }
     div[data-testid="stTextInput"] input:focus {
-        border-color: #2563eb;
+        border-color: #818cf8;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
         box-shadow: none;
     }
     
     /* Hide label on input */
     label[data-testid="stWidgetLabel"] {
         display: none;
+    }
+    
+    /* Scrollbar for chat box */
+    [data-testid="stScrollableContainer"]::-webkit-scrollbar {
+        width: 6px;
+    }
+    [data-testid="stScrollableContainer"]::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    [data-testid="stScrollableContainer"]::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -145,11 +165,11 @@ def submit_chat():
 col_chat, col_vis = st.columns([1.1, 1], gap="large")
 
 with col_chat:
-    # 1. Widget Header (BotPenguin style)
+    # 1. Widget Header (Dark, Outlined)
     st.markdown("""
-    <div style="background-color: #2563eb; color: white; padding: 1.2rem; border-top-left-radius: 16px; border-top-right-radius: 16px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 1.2rem; margin-bottom: -1rem; position: relative; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <span style="font-size: 1.5rem; background: white; border-radius: 50%; padding: 4px;">🤖</span> 
-        <span style="letter-spacing: 0.5px;">Interior AI Assistant</span>
+    <div style="background: rgba(30, 41, 59, 0.9); color: white; padding: 1.2rem; border-top-left-radius: 16px; border-top-right-radius: 16px; border: 2px solid rgba(255,255,255,0.2); border-bottom: none; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 1.2rem; margin-bottom: -1rem; position: relative; z-index: 10;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d8b4fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span style="letter-spacing: 0.5px;">Design Chat</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -232,11 +252,11 @@ with col_chat:
                 except Exception as e:
                     message_placeholder.markdown(f"**Error:** {str(e)}")
 
-    # 3. Input Box directly attached to the bottom (using standard text input to bypass Streamlit chat limitations)
+    # 3. Input Box directly attached to the bottom
     st.text_input("Type a message...", key="chat_input_widget", on_change=submit_chat, placeholder="Write a reply...")
 
 with col_vis:
-    st.markdown("<h3 style='color: #0f172a; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem;'>🖼️ Live Visualizer</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #e2e8f0; font-weight: 500; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;'>🖼️ Live Visualizer</h3>", unsafe_allow_html=True)
     
     if st.session_state.generated_image:
         try:
@@ -246,14 +266,14 @@ with col_vis:
             st.error("Failed to decode the image from the API.")
     else:
         st.markdown("""
-        <div style="text-align:center; padding: 5rem 1rem; background-color: #f8fafc; border-radius: 12px; border: 2px dashed #cbd5e1; margin-bottom: 2rem;">
-            <div style="font-size: 4rem; color: #94a3b8; margin-bottom: 1rem;">📸</div>
-            <p style="font-size: 1.1rem; color: #64748b; font-weight: 500;">Chat with the AI to refine your design.<br>Your premium render will appear here.</p>
+        <div style="text-align:center; padding: 5rem 1rem; background: rgba(0,0,0,0.2); border-radius: 12px; border: 2px dashed rgba(255,255,255,0.1); margin-bottom: 2rem;">
+            <div style="font-size: 4rem; color: #94a3b8; margin-bottom: 1rem; background: linear-gradient(90deg, #d8b4fe, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📸</div>
+            <p style="font-size: 1.1rem; color: #cbd5e1; font-weight: 300;">Chat with the AI to refine your design.<br>Your premium room render will appear here.</p>
         </div>
         """, unsafe_allow_html=True)
         
     if st.session_state.palette:
-        st.markdown("<h4 style='text-align:center; color:#334155; font-weight:700; margin-bottom: 1rem;'>Selected Color Palette</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align:center; color:#d8b4fe; font-weight:500; margin-bottom: 1rem;'>Selected Color Palette</h4>", unsafe_allow_html=True)
         cols = st.columns(len(st.session_state.palette))
         for idx, color in enumerate(st.session_state.palette):
             with cols[idx]:
@@ -263,9 +283,9 @@ with col_vis:
                         width:100%; 
                         height:60px; 
                         border-radius:8px; 
-                        border: 1px solid rgba(0,0,0,0.1);
-                        box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        border: 1px solid rgba(255,255,255,0.1);
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
                     </div>''',
                     unsafe_allow_html=True
                 )
-                st.markdown(f"<p style='text-align:center; font-family:monospace; font-size:0.85rem; color:#475569; margin-top:8px; font-weight:600;'>{color}</p>", unsafe_allow_html=True)
+                st.markdown(f"<p style='text-align:center; font-family:monospace; font-size:0.85rem; color:#cbd5e1; margin-top:8px; font-weight:400;'>{color}</p>", unsafe_allow_html=True)
