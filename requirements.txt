@@ -1,0 +1,4 @@
+streamlit
+httpx
+pillow
+huggingface_hub
