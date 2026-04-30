@@ -184,6 +184,10 @@ with col_chat:
                 for m in st.session_state.messages:
                     api_messages.append({"role": m["role"], "content": m["content"]})
                 
+                if not GROQ_API_KEY:
+                    message_placeholder.error("🚨 **Configuration Error:** `GROQ_API_KEY` is missing! \n\nPlease go to your Hugging Face Space **Settings** -> **Variables and secrets**, add `GROQ_API_KEY`, and then click **Factory Reboot** to restart the space.")
+                    st.stop()
+                    
                 try:
                     headers = {
                         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -222,11 +226,14 @@ with col_chat:
                         
                         if img_prompt:
                             with st.spinner("✨ Design finalized! Generating your stunning 3D room preview..."):
-                                hf_client = InferenceClient(token=HF_TOKEN)
-                                image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
-                                buf = BytesIO()
-                                image.save(buf, format="PNG")
-                                st.session_state.generated_image = buf.getvalue()
+                                if not HF_TOKEN:
+                                    st.error("🚨 `HF_TOKEN` is missing! Please add it in Space Settings -> Variables and secrets.")
+                                else:
+                                    hf_client = InferenceClient(token=HF_TOKEN)
+                                    image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
+                                    buf = BytesIO()
+                                    image.save(buf, format="PNG")
+                                    st.session_state.generated_image = buf.getvalue()
                     
                     st.rerun()
                 except Exception as e:
