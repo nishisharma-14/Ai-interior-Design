@@ -149,6 +149,11 @@ if "generated_image" not in st.session_state:
 if "palette" not in st.session_state:
     st.session_state.palette = []
 
+# Move chat input OUTSIDE of the columns to fix Streamlit SDK constraints
+prompt = st.chat_input("E.g. A cozy modern bedroom with lots of natural light...")
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
 col_chat, col_vis = st.columns([1.2, 1], gap="large")
 
 with col_chat:
@@ -169,14 +174,7 @@ with col_chat:
                 with st.chat_message(msg["role"]):
                     st.markdown(msg["display_content"] if "display_content" in msg else msg["content"])
 
-    # Input area placed directly below the box
-    if prompt := st.chat_input("E.g. A cozy modern bedroom with lots of natural light..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        with chat_box:
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
+        if prompt:
             with st.chat_message("assistant"):
                 message_placeholder = st.empty()
                 message_placeholder.markdown("*(Thinking...)*")
