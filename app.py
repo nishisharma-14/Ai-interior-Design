@@ -251,19 +251,20 @@ with col_chat:
                             img_prompt = build_fallback_image_prompt(st.session_state.messages)
                         
                         if img_prompt:
-                            with st.spinner("✨ Generating your room preview..."):
-                                if not HF_TOKEN:
-                                    st.error("🚨 `HF_TOKEN` is missing! Add it in Space Settings -> Secrets.")
-                                else:
-                                    try:
-                                        hf_client = InferenceClient(token=HF_TOKEN)
-                                        image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
-                                        buf = BytesIO()
-                                        image.save(buf, format="PNG")
-                                        st.session_state.generated_image = buf.getvalue()
-                                    except Exception as img_err:
-                                        st.error(f"Image generation failed: {str(img_err)}")
-                    
+                            st.session_state["img_status"] = f"🔄 Generating image..."
+                            if not HF_TOKEN:
+                                st.session_state["img_status"] = "🚨 HF_TOKEN is missing! Add it in Space Settings -> Secrets, then Factory Reboot."
+                            else:
+                                try:
+                                    hf_client = InferenceClient(token=HF_TOKEN)
+                                    image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
+                                    buf = BytesIO()
+                                    image.save(buf, format="PNG")
+                                    st.session_state.generated_image = buf.getvalue()
+                                    st.session_state["img_status"] = "✅ Image generated!"
+                                except Exception as img_err:
+                                    st.session_state["img_status"] = f"❌ Image failed: {str(img_err)}"
+                        
                     st.rerun()
                 except Exception as e:
                     message_placeholder.markdown(f"**Error:** {str(e)}")
@@ -282,6 +283,16 @@ with col_vis:
     
     vis_container = st.container()
     with vis_container:
+        # Show status message (persists across reruns)
+        if "img_status" in st.session_state and st.session_state["img_status"]:
+            status = st.session_state["img_status"]
+            if "🚨" in status or "❌" in status:
+                st.error(status)
+            elif "✅" in status:
+                st.success(status)
+            else:
+                st.info(status)
+        
         if st.session_state.generated_image:
             try:
                 image = Image.open(BytesIO(st.session_state.generated_image))
