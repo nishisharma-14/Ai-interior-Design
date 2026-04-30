@@ -23,9 +23,7 @@ st.markdown("""
         font-family: 'Outfit', sans-serif;
         font-weight: 700 !important;
         font-size: 3.5rem !important;
-        background: linear-gradient(90deg, #d8b4fe, #818cf8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #d8b4fe !important;
         text-align: center;
         padding-bottom: 2rem;
         margin-top: -2rem;
