@@ -125,10 +125,21 @@ CRITICAL RULES:
 3. FINAL SUMMARY: ONLY once you have enough details (room type, style, and colors), provide a brief final design summary including:
    - A color palette with EXACT HEX CODES (e.g., #2E3440).
    - A short bulleted list of recommended furniture and materials.
-4. IMAGE GENERATION: ONLY in your FINAL message (when the design is complete), include an image prompt at the very end of your message formatted EXACTLY like this:
-   IMAGE_PROMPT: A beautiful modern living room with large windows, dark grey sofa...
-5. DO NOT include the "IMAGE_PROMPT:" tag until the final design plan is ready and all questions have been answered.
+4. IMAGE GENERATION: This is MANDATORY. Every time you provide a final design summary with HEX color codes, you MUST also include an image prompt at the VERY END of your message formatted EXACTLY like this on its own line:
+   IMAGE_PROMPT: A photorealistic interior design of a modern living room with large windows, dark grey sofa, wooden floor, ambient lighting, 8k quality
+5. NEVER forget the IMAGE_PROMPT line. If your message contains HEX codes and furniture suggestions, it MUST end with IMAGE_PROMPT.
+6. DO NOT include the "IMAGE_PROMPT:" tag in early conversational messages where you are still asking questions.
 """
+
+def build_fallback_image_prompt(messages):
+    """Build an image prompt from conversation history when the AI forgets to include one."""
+    conversation_text = " ".join([m["content"] for m in messages if m["role"] != "system"])
+    # Extract key design details
+    room_types = re.findall(r'(bedroom|living room|kitchen|bathroom|office|dining room|studio)', conversation_text, re.IGNORECASE)
+    styles = re.findall(r'(modern|minimalist|rustic|bohemian|scandinavian|industrial|traditional|contemporary|cozy|luxury)', conversation_text, re.IGNORECASE)
+    room = room_types[-1] if room_types else "room"
+    style = styles[-1] if styles else "modern"
+    return f"A photorealistic interior design of a {style} {room}, beautifully decorated, professional interior photography, ambient lighting, 8k quality"
 
 def extract_hex_colors(text):
     return list(set(re.findall(r'(#[A-Fa-f0-9]{6})\b', text)))
@@ -235,16 +246,23 @@ with col_chat:
                         if hex_colors:
                             st.session_state.palette = hex_colors
                         
+                        # Fallback: if AI gave colors but forgot IMAGE_PROMPT, auto-generate one
+                        if not img_prompt and hex_colors and len(hex_colors) >= 2:
+                            img_prompt = build_fallback_image_prompt(st.session_state.messages)
+                        
                         if img_prompt:
                             with st.spinner("✨ Generating your room preview..."):
                                 if not HF_TOKEN:
                                     st.error("🚨 `HF_TOKEN` is missing! Add it in Space Settings -> Secrets.")
                                 else:
-                                    hf_client = InferenceClient(token=HF_TOKEN)
-                                    image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
-                                    buf = BytesIO()
-                                    image.save(buf, format="PNG")
-                                    st.session_state.generated_image = buf.getvalue()
+                                    try:
+                                        hf_client = InferenceClient(token=HF_TOKEN)
+                                        image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
+                                        buf = BytesIO()
+                                        image.save(buf, format="PNG")
+                                        st.session_state.generated_image = buf.getvalue()
+                                    except Exception as img_err:
+                                        st.error(f"Image generation failed: {str(img_err)}")
                     
                     st.rerun()
                 except Exception as e:
