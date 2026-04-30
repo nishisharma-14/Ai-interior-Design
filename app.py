@@ -296,7 +296,7 @@ with col_vis:
         
         if st.session_state.generated_image:
             try:
-                st.image(st.session_state.generated_image, width="stretch")
+                st.image(st.session_state.generated_image, use_container_width=True)
             except Exception as display_err:
                 st.error(f"Failed to display the image: {str(display_err)}")
         else:
