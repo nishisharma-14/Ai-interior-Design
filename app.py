@@ -260,6 +260,7 @@ with col_chat:
                                     image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
                                     buf = BytesIO()
                                     image.save(buf, format="PNG")
+                                    buf.seek(0)
                                     st.session_state.generated_image = buf.getvalue()
                                     st.session_state["img_status"] = "✅ Image generated!"
                                 except Exception as img_err:
@@ -295,10 +296,9 @@ with col_vis:
         
         if st.session_state.generated_image:
             try:
-                image = Image.open(BytesIO(st.session_state.generated_image))
-                st.image(image, width="stretch")
-            except Exception:
-                st.error("Failed to decode the image.")
+                st.image(st.session_state.generated_image, width="stretch")
+            except Exception as display_err:
+                st.error(f"Failed to display the image: {str(display_err)}")
         else:
             st.markdown("""
             <div style="text-align:center; padding: 6rem 1rem;">
