@@ -6,108 +6,112 @@ from io import BytesIO
 from PIL import Image
 from huggingface_hub import InferenceClient
 
-st.set_page_config(page_title="Interior Design AI", page_icon="🛋️", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Interior Design AI", page_icon="✨", layout="wide", initial_sidebar_state="expanded")
 
-# Inject Custom CSS
+# Light Theme CSS based on Veritas
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
     .stApp {
-        background: radial-gradient(circle at 15% 50%, #1e1b4b, #09090b);
-        color: #f8fafc;
-        font-family: 'Outfit', sans-serif;
+        background: #ffffff;
+        color: #1f2937;
+        font-family: 'Inter', sans-serif;
     }
     
-    h1 {
-        font-family: 'Outfit', sans-serif;
-        font-weight: 700 !important;
-        font-size: 3.5rem !important;
-        color: #d8b4fe !important;
-        text-align: center;
-        padding-bottom: 2rem;
-        margin-top: -2rem;
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: #fcfcfc;
+        border-right: 1px solid #e5e7eb;
     }
     
-    /* Both columns get the card treatment */
-    [data-testid="column"] {
-        background: rgba(15, 23, 42, 0.4);
-        padding: 0rem;
-        border-radius: 16px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        border: 2px solid rgba(255,255,255,0.15);
-        overflow: hidden;
+    /* Top Logo text */
+    .logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 1rem;
     }
     
-    /* Scrollable Chat Box Container */
-    [data-testid="stVerticalBlock"] > div[data-testid="stScrollableContainer"] {
-        background: transparent !important;
-        border: none !important;
-        padding: 1.2rem !important;
-    }
-    
-    /* AI Message Bubble */
-    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 18px;
-        border-bottom-left-radius: 4px;
-        padding: 0.8rem 1.2rem;
-        color: #f8fafc;
-        margin-right: 10%;
-        margin-bottom: 0.8rem;
-    }
-    
-    /* User Message Bubble */
-    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-        flex-direction: row-reverse;
-        background: rgba(129, 140, 248, 0.15);
-        border: 1px solid rgba(129, 140, 248, 0.3);
-        border-radius: 18px;
-        border-bottom-right-radius: 4px;
-        padding: 0.8rem 1.2rem;
-        color: #f8fafc !important;
-        margin-left: 10%;
-        margin-bottom: 0.8rem;
-    }
-    
-    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p {
-        color: #f8fafc !important;
-    }
-    
-    /* Input field */
-    div[data-testid="stTextInput"] input {
-        border-radius: 0px 0px 14px 14px !important;
+    /* Buttons */
+    div.stButton > button:first-child {
+        background-color: #1e40af;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
         border: none;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        padding: 1.2rem;
-        background: rgba(0, 0, 0, 0.3);
+        width: 100%;
+        transition: all 0.2s;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #1e3a8a;
         color: white;
-        font-size: 1rem;
     }
-    div[data-testid="stTextInput"] input::placeholder {
-        color: rgba(255,255,255,0.3);
+
+    /* Suggestion cards */
+    .suggestion-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        background: white;
+        height: 100%;
+        color: #4b5563;
+        font-size: 0.95rem;
     }
-    div[data-testid="stTextInput"] input:focus {
-        border-color: #818cf8;
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        box-shadow: none;
+    .suggestion-card:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: #f8fafc;
     }
-    
-    label[data-testid="stWidgetLabel"] {
-        display: none;
-    }
-    
-    [data-testid="stScrollableContainer"]::-webkit-scrollbar {
-        width: 6px;
-    }
-    [data-testid="stScrollableContainer"]::-webkit-scrollbar-track {
+
+    /* Chat Messages */
+    div[data-testid="stChatMessage"] {
         background: transparent;
+        padding: 1rem 0;
     }
-    [data-testid="stScrollableContainer"]::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+        background-color: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.5rem 2rem;
+        border-radius: 0;
+        margin: 0 -2rem;
+    }
+    
+    /* Center column width */
+    .block-container {
+        max-width: 900px;
+        padding-top: 2rem;
+        padding-bottom: 5rem;
+    }
+
+    /* Hero */
+    .hero-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10vh;
+        margin-bottom: 3rem;
+    }
+    .hero-icon {
+        font-size: 3rem;
+        color: #60a5fa;
+        margin-bottom: 1rem;
+    }
+    .hero-title {
+        font-size: 1.5rem;
+        color: #374151;
+        font-weight: 500;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -119,20 +123,17 @@ SYSTEM_PROMPT = """You are an expert interior designer AI assistant. Your goal i
 
 CRITICAL RULES:
 1. BE CONCISE: Keep your responses to 2-3 short sentences. NEVER output large paragraphs.
-2. ASK MINIMAL QUESTIONS: Ask only 1 or 2 essential questions at a time (e.g., "What is the room type?", "Do you have a specific style or color in mind?"). Do not overwhelm the user.
-3. FINAL SUMMARY: ONLY once you have enough details (room type, style, and colors), provide a brief final design summary including:
-   - A color palette with EXACT HEX CODES (e.g., #2E3440).
+2. ASK MINIMAL QUESTIONS: Ask only 1 or 2 essential questions at a time.
+3. FINAL SUMMARY: ONLY once you have enough details, provide a brief final design summary including:
+   - A color palette with EXACT HEX CODES.
    - A short bulleted list of recommended furniture and materials.
-4. IMAGE GENERATION: This is MANDATORY. Every time you provide a final design summary with HEX color codes, you MUST also include an image prompt at the VERY END of your message formatted EXACTLY like this on its own line:
-   IMAGE_PROMPT: A photorealistic interior design of a modern living room with large windows, dark grey sofa, wooden floor, ambient lighting, 8k quality
-5. NEVER forget the IMAGE_PROMPT line. If your message contains HEX codes and furniture suggestions, it MUST end with IMAGE_PROMPT.
-6. DO NOT include the "IMAGE_PROMPT:" tag in early conversational messages where you are still asking questions.
+4. IMAGE GENERATION: Every time you provide a final design summary with HEX color codes, you MUST also include an image prompt at the VERY END of your message formatted EXACTLY like this on its own line:
+   IMAGE_PROMPT: A photorealistic interior design of a modern living room...
+5. NEVER forget the IMAGE_PROMPT line when giving final colors/summary.
 """
 
 def build_fallback_image_prompt(messages):
-    """Build an image prompt from conversation history when the AI forgets to include one."""
     conversation_text = " ".join([m["content"] for m in messages if m["role"] != "system"])
-    # Extract key design details
     room_types = re.findall(r'(bedroom|living room|kitchen|bathroom|office|dining room|studio)', conversation_text, re.IGNORECASE)
     styles = re.findall(r'(modern|minimalist|rustic|bohemian|scandinavian|industrial|traditional|contemporary|cozy|luxury)', conversation_text, re.IGNORECASE)
     room = room_types[-1] if room_types else "room"
@@ -151,175 +152,163 @@ def extract_image_prompt(text):
 def clean_message(text):
     return re.sub(r'IMAGE_PROMPT:\s*(.+?)(?:\n|$)', '', text, flags=re.IGNORECASE).strip()
 
-st.title("✨ Interior Design AI")
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "generated_image" not in st.session_state:
-    st.session_state.generated_image = None
-if "palette" not in st.session_state:
-    st.session_state.palette = []
 if "trigger_api" not in st.session_state:
     st.session_state.trigger_api = False
-if "chat_input_widget" not in st.session_state:
-    st.session_state.chat_input_widget = ""
+if "pending_input" not in st.session_state:
+    st.session_state.pending_input = ""
 
-def submit_chat():
-    val = st.session_state.chat_input_widget
-    if val and val.strip():
-        st.session_state.messages.append({"role": "user", "content": val})
-        st.session_state.trigger_api = True
-        st.session_state.chat_input_widget = ""
+# Sidebar
+with st.sidebar:
+    st.markdown("<div class='logo-text'>✨ Interior AI</div>", unsafe_allow_html=True)
+    if st.button("New Design", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.trigger_api = False
+        st.rerun()
+    
+    st.markdown("<div style='margin-top: 2rem; font-size: 0.8rem; font-weight: 600; color: #9ca3af; letter-spacing: 1px;'>SYSTEM: CONNECTED</div>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 1rem;'>🕒 DESIGN HISTORY</div>", unsafe_allow_html=True)
+    if len(st.session_state.messages) > 0:
+        first_msg = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Current Session")
+        st.markdown(f"<div style='background: #f3f4f6; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: #4b5563; border: 1px solid #e5e7eb;'>{first_msg[:50]}...</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='font-size: 0.85rem; color: #9ca3af;'>No history yet.</div>", unsafe_allow_html=True)
 
-col_chat, col_vis = st.columns([1.1, 1], gap="large")
-
-with col_chat:
-    # Header bar inside the card
+# Main Area
+if len(st.session_state.messages) == 0:
     st.markdown("""
-    <div style="background: rgba(0,0,0,0.3); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d8b4fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span style="font-weight: 600; font-size: 1.1rem; color: #e2e8f0;">Design Chat</span>
-    </div>
+        <div class="hero-container">
+            <div class="hero-icon">✨</div>
+            <div class="hero-title">What would you like to design today?</div>
+        </div>
     """, unsafe_allow_html=True)
     
-    chat_box = st.container(height=450, border=False)
-    
-    with chat_box:
-        if len(st.session_state.messages) == 0:
-            with st.chat_message("assistant"):
-                st.markdown("Hi! Welcome to Interior AI. I'll be assisting you today.\n\n**What type of room would you like to design?**")
-                
-        for msg in st.session_state.messages:
-            if msg["role"] != "system":
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["display_content"] if "display_content" in msg else msg["content"])
-                    
-        if st.session_state.trigger_api:
-            st.session_state.trigger_api = False
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                message_placeholder.markdown("*(Typing...)*")
-                
-                api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-                for m in st.session_state.messages:
-                    api_messages.append({"role": m["role"], "content": m["content"]})
-                
-                if not GROQ_API_KEY:
-                    message_placeholder.error("🚨 `GROQ_API_KEY` is missing! Add it in Space Settings -> Secrets, then Factory Reboot.")
-                    st.stop()
-                    
-                try:
-                    headers = {
-                        "Authorization": f"Bearer {GROQ_API_KEY}",
-                        "Content-Type": "application/json"
-                    }
-                    payload = {
-                        "model": "llama-3.3-70b-versatile", 
-                        "messages": api_messages,
-                        "temperature": 0.7,
-                        "top_p": 0.9
-                    }
-                    
-                    with httpx.Client(timeout=60.0) as client:
-                        response = client.post(
-                            "https://api.groq.com/openai/v1/chat/completions",
-                            headers=headers,
-                            json=payload
-                        )
-                        response.raise_for_status()
-                        data = response.json()
-                        full_reply = data["choices"][0]["message"]["content"]
-                        
-                        img_prompt = extract_image_prompt(full_reply)
-                        hex_colors = extract_hex_colors(full_reply)
-                        clean_reply = clean_message(full_reply)
-                        
-                        message_placeholder.markdown(clean_reply)
-                        st.session_state.messages.append({
-                            "role": "assistant", 
-                            "content": full_reply,
-                            "display_content": clean_reply
-                        })
-                        
-                        if hex_colors:
-                            st.session_state.palette = hex_colors
-                        
-                        # Fallback: if AI gave colors but forgot IMAGE_PROMPT, auto-generate one
-                        if not img_prompt and hex_colors and len(hex_colors) >= 2:
-                            img_prompt = build_fallback_image_prompt(st.session_state.messages)
-                        
-                        if img_prompt:
-                            st.session_state["img_status"] = f"🔄 Generating image..."
-                            if not HF_TOKEN:
-                                st.session_state["img_status"] = "🚨 HF_TOKEN is missing! Add it in Space Settings -> Secrets, then Factory Reboot."
-                            else:
-                                try:
-                                    hf_client = InferenceClient(token=HF_TOKEN)
-                                    image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
-                                    buf = BytesIO()
-                                    image.save(buf, format="PNG")
-                                    buf.seek(0)
-                                    st.session_state.generated_image = buf.getvalue()
-                                    st.session_state["img_status"] = "✅ Image generated!"
-                                except Exception as img_err:
-                                    st.session_state["img_status"] = f"❌ Image failed: {str(img_err)}"
-                        
-                    st.rerun()
-                except Exception as e:
-                    message_placeholder.markdown(f"**Error:** {str(e)}")
+    # 2x2 Grid of Suggestions
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Modern minimalist living room", use_container_width=True):
+            st.session_state.pending_input = "I want to design a modern minimalist living room."
+            st.session_state.trigger_api = True
+        if st.button("Cozy scandinavian bedroom", use_container_width=True):
+            st.session_state.pending_input = "I want to design a cozy scandinavian bedroom."
+            st.session_state.trigger_api = True
+    with col2:
+        if st.button("Rustic industrial kitchen", use_container_width=True):
+            st.session_state.pending_input = "I want to design a rustic industrial kitchen."
+            st.session_state.trigger_api = True
+        if st.button("Bohemian productive home office", use_container_width=True):
+            st.session_state.pending_input = "I want to design a bohemian productive home office."
+            st.session_state.trigger_api = True
 
-    # Input attached to bottom of the card
-    st.text_input("Type a message...", key="chat_input_widget", on_change=submit_chat, placeholder="Type your message and press Enter...")
-
-with col_vis:
-    # Header bar inside the card
-    st.markdown("""
-    <div style="background: rgba(0,0,0,0.3); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d8b4fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-        <span style="font-weight: 600; font-size: 1.1rem; color: #e2e8f0;">Live Visualizer</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    vis_container = st.container()
-    with vis_container:
-        # Show status message (persists across reruns)
-        if "img_status" in st.session_state and st.session_state["img_status"]:
-            status = st.session_state["img_status"]
-            if "🚨" in status or "❌" in status:
-                st.error(status)
-            elif "✅" in status:
-                st.success(status)
-            else:
-                st.info(status)
-        
-        if st.session_state.generated_image:
-            try:
-                st.image(st.session_state.generated_image, use_column_width=True)
-            except Exception as display_err:
-                st.error(f"Failed to display the image: {str(display_err)}")
-        else:
-            st.markdown("""
-            <div style="text-align:center; padding: 6rem 1rem;">
-                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.4;">🏠</div>
-                <p style="font-size: 1.05rem; color: #94a3b8; font-weight: 400;">Chat with the AI to refine your design.<br>Your room render will appear here.</p>
-            </div>
-            """, unsafe_allow_html=True)
+# Chat Interface
+for idx, msg in enumerate(st.session_state.messages):
+    if msg["role"] != "system":
+        with st.chat_message(msg["role"]):
+            st.markdown(msg.get("display_content", msg["content"]))
             
-        if st.session_state.palette:
-            st.markdown("<hr style='border-color: rgba(255,255,255,0.08); margin: 1.5rem 1rem;'>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align:center; color:#d8b4fe; font-weight:600; font-size:1rem; margin-bottom: 1rem;'>Color Palette</p>", unsafe_allow_html=True)
-            cols = st.columns(len(st.session_state.palette))
-            for idx, color in enumerate(st.session_state.palette):
-                with cols[idx]:
-                    st.markdown(
-                        f'''<div style="
-                            background-color:{color}; 
-                            width:100%; 
-                            height:50px; 
-                            border-radius:8px; 
-                            border: 1px solid rgba(255,255,255,0.1);
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                        </div>''',
-                        unsafe_allow_html=True
-                    )
-                    st.markdown(f"<p style='text-align:center; font-family:monospace; font-size:0.8rem; color:#cbd5e1; margin-top:6px;'>{color}</p>", unsafe_allow_html=True)
+            # Display generated image and palette if it exists for this assistant message
+            if msg["role"] == "assistant":
+                if "palette" in msg and msg["palette"]:
+                    st.markdown("<div style='margin-top: 1rem;'><strong>Color Palette:</strong></div>", unsafe_allow_html=True)
+                    cols = st.columns(len(msg["palette"]))
+                    for c_idx, color in enumerate(msg["palette"]):
+                        with cols[c_idx]:
+                            st.markdown(f'''<div style="background-color:{color}; width:100%; height:40px; border-radius:6px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"></div>
+                                        <p style='text-align:center; font-family:monospace; font-size:0.75rem; color:#6b7280; margin-top:4px;'>{color}</p>''', unsafe_allow_html=True)
+                
+                if "image" in msg and msg["image"]:
+                    st.image(msg["image"], use_container_width=True, caption="Generated Concept")
+
+# Input Handling
+user_input = st.chat_input("Enter a statement to design...")
+
+if user_input or st.session_state.pending_input:
+    val = user_input if user_input else st.session_state.pending_input
+    st.session_state.pending_input = ""
+    
+    st.session_state.messages.append({"role": "user", "content": val})
+    st.session_state.trigger_api = True
+    st.rerun()
+
+# API Trigger
+if st.session_state.trigger_api:
+    st.session_state.trigger_api = False
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        message_placeholder.markdown("*(Thinking...)*")
+        
+        api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        for m in st.session_state.messages:
+            api_messages.append({"role": m["role"], "content": m["content"]})
+        
+        if not GROQ_API_KEY:
+            message_placeholder.error("🚨 `GROQ_API_KEY` is missing!")
+            st.stop()
+            
+        try:
+            headers = {
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "llama-3.3-70b-versatile", 
+                "messages": api_messages,
+                "temperature": 0.7,
+            }
+            
+            with httpx.Client(timeout=60.0) as client:
+                response = client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers=headers,
+                    json=payload
+                )
+                response.raise_for_status()
+                data = response.json()
+                full_reply = data["choices"][0]["message"]["content"]
+                
+                img_prompt = extract_image_prompt(full_reply)
+                hex_colors = extract_hex_colors(full_reply)
+                clean_reply = clean_message(full_reply)
+                
+                message_placeholder.markdown(clean_reply)
+                
+                new_msg = {
+                    "role": "assistant", 
+                    "content": full_reply,
+                    "display_content": clean_reply,
+                    "palette": hex_colors,
+                    "image": None
+                }
+                
+                # Image Generation
+                if not img_prompt and hex_colors and len(hex_colors) >= 2:
+                    img_prompt = build_fallback_image_prompt(st.session_state.messages)
+                
+                if img_prompt:
+                    img_status = st.empty()
+                    img_status.info("🔄 Generating image...")
+                    if HF_TOKEN:
+                        try:
+                            hf_client = InferenceClient(token=HF_TOKEN)
+                            image = hf_client.text_to_image(img_prompt, model="black-forest-labs/FLUX.1-schnell")
+                            buf = BytesIO()
+                            image.save(buf, format="PNG")
+                            buf.seek(0)
+                            new_msg["image"] = buf.getvalue()
+                            img_status.empty()
+                            st.image(new_msg["image"], use_container_width=True, caption="Generated Concept")
+                        except Exception as img_err:
+                            img_status.error(f"❌ Image failed: {str(img_err)}")
+                    else:
+                        img_status.warning("🚨 HF_TOKEN missing, cannot generate image.")
+                
+                st.session_state.messages.append(new_msg)
+                
+                # Rerun to render palettes correctly if needed
+                if hex_colors:
+                    st.rerun()
+                    
+        except Exception as e:
+            message_placeholder.markdown(f"**Error:** {str(e)}")
