@@ -215,7 +215,7 @@ for idx, msg in enumerate(st.session_state.messages):
                                         <p style='text-align:center; font-family:monospace; font-size:0.75rem; color:#6b7280; margin-top:4px;'>{color}</p>''', unsafe_allow_html=True)
                 
                 if "image" in msg and msg["image"]:
-                    st.image(msg["image"], use_container_width=True, caption="Generated Concept")
+                    st.image(msg["image"], use_column_width=True, caption="Generated Concept")
 
 # Input Handling
 user_input = st.chat_input("Enter a statement to design...")
@@ -294,7 +294,7 @@ if st.session_state.trigger_api:
                             buf.seek(0)
                             new_msg["image"] = buf.getvalue()
                             img_status.empty()
-                            st.image(new_msg["image"], use_container_width=True, caption="Generated Concept")
+                            st.image(new_msg["image"], use_column_width=True, caption="Generated Concept")
                         except Exception as img_err:
                             img_status.error(f"❌ Image failed: {str(img_err)}")
                     else:
