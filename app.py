@@ -13,19 +13,11 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    .stApp {
-        background: #ffffff;
-        color: #1f2937;
+    html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
     }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #fcfcfc;
-        border-right: 1px solid #e5e7eb;
-    }
-    
-    /* Top Logo text */
+
+    /* Top Logo text in sidebar */
     .logo-text {
         font-size: 1.5rem;
         font-weight: 700;
@@ -38,39 +30,39 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    /* Buttons */
-    div.stButton > button:first-child {
-        background-color: #1e40af;
-        color: white;
+    /* Main Suggestion Buttons (White cards) */
+    .block-container div.stButton > button {
+        background-color: #ffffff;
+        color: #4b5563;
         border-radius: 8px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-        border: none;
+        padding: 1rem;
+        font-weight: 400;
+        border: 1px solid #e5e7eb;
         width: 100%;
         transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    div.stButton > button:first-child:hover {
-        background-color: #1e3a8a;
-        color: white;
+    .block-container div.stButton > button:hover {
+        border-color: #93c5fd;
+        background-color: #f8fafc;
+        color: #1e40af;
     }
-
-    /* Suggestion cards */
-    .suggestion-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1.25rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: center;
-        background: white;
-        height: 100%;
-        color: #4b5563;
+    .block-container div.stButton > button p {
         font-size: 0.95rem;
     }
-    .suggestion-card:hover {
-        border-color: #93c5fd;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        background-color: #f8fafc;
+
+    /* Sidebar "New Design" Button (Blue) */
+    [data-testid="stSidebar"] div.stButton > button {
+        background-color: #1e40af;
+        color: #ffffff;
+        border-radius: 8px;
+        font-weight: 500;
+        border: none;
+        transition: all 0.2s;
+    }
+    [data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #1e3a8a;
+        color: #ffffff;
     }
 
     /* Chat Messages */
@@ -87,6 +79,10 @@ st.markdown("""
         margin: 0 -2rem;
     }
     
+    div[data-testid="stChatMessage"] p {
+        color: #1f2937;
+    }
+
     /* Center column width */
     .block-container {
         max-width: 900px;

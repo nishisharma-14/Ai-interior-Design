@@ -45,6 +45,16 @@ try:
         repo_type="space",
         token=token
     )
+    
+    print("Uploading .streamlit/config.toml...")
+    if os.path.exists(".streamlit/config.toml"):
+        api.upload_file(
+            path_or_fileobj=".streamlit/config.toml",
+            path_in_repo=".streamlit/config.toml",
+            repo_id=repo_name,
+            repo_type="space",
+            token=token
+        )
     print(f"SUCCESS! View your deployed space at: https://huggingface.co/spaces/{repo_name}")
 except Exception as e:
     print(f"Deployment failed: {e}")
