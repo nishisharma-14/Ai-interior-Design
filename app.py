@@ -13,15 +13,53 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
+    
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
+    }
+
+    /* App Background */
+    [data-testid="stAppViewContainer"] {
+        background: radial-gradient(circle at 15% 50%, #FAF9F6 0%, #F5F4F0 50%, #E8E6E1 100%);
+    }
+
+    /* Hero Text */
+    .hero-title {
+        font-size: 3.5rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #4A4A48 0%, #8B7355 50%, #A39171 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        padding-top: 1rem;
+        margin-bottom: 2.5rem;
+        animation: gradient-shift 6s ease infinite;
+        background-size: 200% 200%;
+        line-height: 1.2;
+    }
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .hero-icon {
+        font-size: 4rem;
+        margin-bottom: 0.5rem;
+        animation: float 3s ease-in-out infinite;
+        text-align: center;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
     }
 
     /* Top Logo text in sidebar */
     .logo-text {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #1e3a8a;
+        color: #4A4A48;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -30,30 +68,33 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    /* Main Suggestion Buttons (White cards) */
+    /* Main Suggestion Buttons (Glassy cards) */
     .block-container div.stButton > button {
-        background-color: #ffffff;
-        color: #4b5563;
-        border-radius: 8px;
-        padding: 1rem;
-        font-weight: 400;
-        border: 1px solid #e5e7eb;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        color: #1f2937;
+        border-radius: 16px;
+        padding: 1.5rem;
+        font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.5);
         width: 100%;
-        transition: all 0.2s;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02), 0 10px 15px rgba(0,0,0,0.03);
     }
     .block-container div.stButton > button:hover {
-        border-color: #93c5fd;
-        background-color: #f8fafc;
-        color: #1e40af;
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(139, 115, 85, 0.15);
+        border-color: rgba(139, 115, 85, 0.3);
+        background: rgba(255, 255, 255, 0.9);
+        color: #8B7355;
     }
     .block-container div.stButton > button p {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
     }
 
-    /* Sidebar "New Design" Button (Blue) */
+    /* Sidebar "New Design" Button (Taupe) */
     [data-testid="stSidebar"] div.stButton > button {
-        background-color: #1e40af;
+        background-color: #8B7355;
         color: #ffffff;
         border-radius: 8px;
         font-weight: 500;
@@ -61,26 +102,107 @@ st.markdown("""
         transition: all 0.2s;
     }
     [data-testid="stSidebar"] div.stButton > button:hover {
-        background-color: #1e3a8a;
+        background-color: #6d5a42;
         color: #ffffff;
     }
 
-    /* Chat Messages */
+    /* iMessage-Style Chat Messages */
     div[data-testid="stChatMessage"] {
-        background: transparent;
-        padding: 1rem 0;
-    }
-    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-        background-color: #f8fafc;
-        border-top: 1px solid #f1f5f9;
-        border-bottom: 1px solid #f1f5f9;
-        padding: 1.5rem 2rem;
-        border-radius: 0;
-        margin: 0 -2rem;
+        background: transparent !important;
+        padding: 0.5rem 0;
+        border: none !important;
     }
     
-    div[data-testid="stChatMessage"] p {
+    /* Assistant Bubbles */
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) > div:nth-child(2) {
+        background-color: #f1f5f9;
         color: #1f2937;
+        padding: 1rem 1.5rem;
+        border-radius: 20px 20px 20px 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        margin-left: 0.5rem;
+        width: fit-content;
+        max-width: 85%;
+    }
+    
+    /* User Bubbles */
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+        flex-direction: row-reverse;
+    }
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) > div:nth-child(2) {
+        background-color: #8B7355;
+        color: #ffffff;
+        padding: 1rem 1.5rem;
+        border-radius: 20px 20px 4px 20px;
+        box-shadow: 0 2px 4px rgba(139,115,85,0.2);
+        margin-right: 0.5rem;
+        width: fit-content;
+        max-width: 85%;
+    }
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) > div:nth-child(2) p {
+        color: #ffffff;
+    }
+    
+    /* Enhanced Color Palette */
+    .color-palette-box {
+        position: relative;
+        width: 100%;
+        height: 50px;
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05), inset 0 2px 4px rgba(255,255,255,0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .color-palette-box::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 50%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+        border-radius: 12px 12px 0 0;
+    }
+    .color-palette-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.5);
+    }
+    .color-palette-text {
+        text-align: center;
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 6px;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    /* Pill-Shaped Chat Input */
+    [data-testid="stChatInput"] {
+        border-radius: 9999px !important;
+        border: 1px solid #e5e7eb !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+        background-color: #ffffff;
+        overflow: hidden;
+    }
+    [data-testid="stChatInput"] > div {
+        border: none !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
+    }
+    [data-testid="stChatInput"]:focus-within {
+        border-color: #8B7355 !important;
+        box-shadow: 0 4px 12px rgba(139,115,85,0.15) !important;
+    }
+
+    /* Slider Thumbs */
+    .stSlider [role="slider"] {
+        border-radius: 9999px !important;
+        background-color: #8B7355 !important;
+        border: 2px solid #FAFAF7 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    .stSlider [role="slider"]:hover {
+        transform: scale(1.1);
     }
 
     /* Center column width */
@@ -109,6 +231,8 @@ st.markdown("""
         color: #374151;
         font-weight: 500;
     }
+
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -128,13 +252,14 @@ CRITICAL RULES:
 5. NEVER forget the IMAGE_PROMPT line when giving final colors/summary.
 """
 
-def build_fallback_image_prompt(messages):
+def build_fallback_image_prompt(messages, vibe="Balanced", mats=[]):
     conversation_text = " ".join([m["content"] for m in messages if m["role"] != "system"])
     room_types = re.findall(r'(bedroom|living room|kitchen|bathroom|office|dining room|studio)', conversation_text, re.IGNORECASE)
     styles = re.findall(r'(modern|minimalist|rustic|bohemian|scandinavian|industrial|traditional|contemporary|cozy|luxury)', conversation_text, re.IGNORECASE)
     room = room_types[-1] if room_types else "room"
     style = styles[-1] if styles else "modern"
-    return f"A photorealistic interior design of a {style} {room}, beautifully decorated, professional interior photography, ambient lighting, 8k quality"
+    mat_str = f", featuring {', '.join(mats)}" if mats else ""
+    return f"A photorealistic {vibe.lower()} interior design of a {style} {room}{mat_str}, beautifully decorated, professional interior photography, ambient lighting, 8k quality"
 
 def extract_hex_colors(text):
     return list(set(re.findall(r'(#[A-Fa-f0-9]{6})\b', text)))
@@ -150,27 +275,83 @@ def clean_message(text):
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "saved_chats" not in st.session_state:
+    st.session_state.saved_chats = []
 if "trigger_api" not in st.session_state:
     st.session_state.trigger_api = False
 if "pending_input" not in st.session_state:
     st.session_state.pending_input = ""
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
 
 # Sidebar
 with st.sidebar:
     st.markdown("<div class='logo-text'>✨ Interior AI</div>", unsafe_allow_html=True)
-    if st.button("New Design", use_container_width=True):
+    
+    # 1. Dark Mode Toggle
+    dark_toggle = st.toggle("🌙 Dark Mode", value=st.session_state.dark_mode)
+    if dark_toggle != st.session_state.dark_mode:
+        st.session_state.dark_mode = dark_toggle
+        st.rerun()
+        
+    st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
+    
+    # 1.5 Visual Controls
+    st.markdown("<div style='font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 0.5rem;'>🎛️ DESIGN VIBE</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 0.75rem; color: #4b5563;'>Complexity</div>", unsafe_allow_html=True)
+    vibe_level = st.select_slider("Vibe", options=["Minimalist", "Balanced", "Maximalist"], value="Balanced", label_visibility="collapsed")
+    
+    st.markdown("<div style='font-size: 0.75rem; color: #4b5563; margin-top: 0.5rem;'>Budget Target</div>", unsafe_allow_html=True)
+    budget_level = st.select_slider("Budget", options=["$ IKEA", "$$ Mid-Range", "$$$ Designer"], value="$$ Mid-Range", label_visibility="collapsed")
+    
+    st.markdown("<div style='font-size: 0.75rem; color: #4b5563; margin-top: 0.5rem;'>Primary Materials</div>", unsafe_allow_html=True)
+    materials = st.multiselect("Key Materials", ["🪵 Wood", "🪨 Marble", "⛓️ Metal", "🌿 Plants", "🧶 Velvet", "🧱 Brick"], default=["🪵 Wood", "🌿 Plants"], label_visibility="collapsed")
+    
+    st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
+    
+    # 2. History Section
+    st.markdown("<div style='font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 1rem;'>🕒 DESIGN HISTORY</div>", unsafe_allow_html=True)
+    
+    if len(st.session_state.saved_chats) == 0 and len(st.session_state.messages) == 0:
+        st.markdown("<div style='font-size: 0.85rem; color: #9ca3af;'>No history yet.</div>", unsafe_allow_html=True)
+    else:
+        for i, chat in enumerate(st.session_state.saved_chats):
+            first_msg = next((m["content"] for m in chat if m["role"] == "user"), f"Saved Session {i+1}")
+            if st.button(f"📜 {first_msg[:25]}...", key=f"saved_{i}", use_container_width=True):
+                st.session_state.messages = list(chat)
+                st.session_state.trigger_api = False
+                st.rerun()
+                
+        if len(st.session_state.messages) > 0:
+            current_first_msg = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Current Session")
+            st.markdown(f"<div style='background: #f3f4f6; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: #4b5563; border: 1px solid #e5e7eb; margin-top: 0.5rem; margin-bottom: 0.5rem;'>🟢 Current: {current_first_msg[:20]}...</div>", unsafe_allow_html=True)
+
+    st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
+    
+    # 3. Save Chat and New Design Buttons
+    if len(st.session_state.messages) > 0:
+        if st.button("💾 Save Chat to Dashboard", use_container_width=True):
+            st.session_state.saved_chats.append(list(st.session_state.messages))
+            st.success("Chat saved!")
+
+    if st.button("✨ New Design", use_container_width=True):
         st.session_state.messages = []
         st.session_state.trigger_api = False
         st.rerun()
     
     st.markdown("<div style='margin-top: 2rem; font-size: 0.8rem; font-weight: 600; color: #9ca3af; letter-spacing: 1px;'>SYSTEM: CONNECTED</div>", unsafe_allow_html=True)
-    st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size: 0.8rem; font-weight: 600; color: #6b7280; margin-bottom: 1rem;'>🕒 DESIGN HISTORY</div>", unsafe_allow_html=True)
-    if len(st.session_state.messages) > 0:
-        first_msg = next((m["content"] for m in st.session_state.messages if m["role"] == "user"), "Current Session")
-        st.markdown(f"<div style='background: #f3f4f6; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: #4b5563; border: 1px solid #e5e7eb;'>{first_msg[:50]}...</div>", unsafe_allow_html=True)
-    else:
-        st.markdown("<div style='font-size: 0.85rem; color: #9ca3af;'>No history yet.</div>", unsafe_allow_html=True)
+    
+
+
+# Apply Dark Mode CSS if enabled
+# Apply Dark Mode CSS if enabled
+if st.session_state.dark_mode:
+    st.markdown("""
+    <style>
+        html { filter: invert(1) hue-rotate(180deg); }
+        img, picture, video, svg, iframe, .color-palette-box { filter: invert(1) hue-rotate(180deg) !important; }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Main Area
 if len(st.session_state.messages) == 0:
@@ -211,8 +392,8 @@ for idx, msg in enumerate(st.session_state.messages):
                     cols = st.columns(len(msg["palette"]))
                     for c_idx, color in enumerate(msg["palette"]):
                         with cols[c_idx]:
-                            st.markdown(f'''<div style="background-color:{color}; width:100%; height:40px; border-radius:6px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"></div>
-                                        <p style='text-align:center; font-family:monospace; font-size:0.75rem; color:#6b7280; margin-top:4px;'>{color}</p>''', unsafe_allow_html=True)
+                            st.markdown(f'''<div class="color-palette-box" style="background-color:{color};" title="{color}"></div>
+                                        <p class="color-palette-text">{color}</p>''', unsafe_allow_html=True)
                 
                 if "image" in msg and msg["image"]:
                     st.image(msg["image"], use_column_width=True, caption="Generated Concept")
@@ -235,7 +416,9 @@ if st.session_state.trigger_api:
         message_placeholder = st.empty()
         message_placeholder.markdown("*(Thinking...)*")
         
-        api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        api_messages = []
+        dynamic_sys_prompt = SYSTEM_PROMPT + f"\n\nUSER CONSTRAINTS:\n- Style/Complexity: {vibe_level}\n- Budget: {budget_level}\n- Preferred Materials: {', '.join(materials)}\nEnsure your recommendations respect these constraints!"
+        api_messages.append({"role": "system", "content": dynamic_sys_prompt})
         for m in st.session_state.messages:
             api_messages.append({"role": m["role"], "content": m["content"]})
         
@@ -280,7 +463,7 @@ if st.session_state.trigger_api:
                 
                 # Image Generation
                 if not img_prompt and hex_colors and len(hex_colors) >= 2:
-                    img_prompt = build_fallback_image_prompt(st.session_state.messages)
+                    img_prompt = build_fallback_image_prompt(st.session_state.messages, vibe_level, materials)
                 
                 if img_prompt:
                     img_status = st.empty()
